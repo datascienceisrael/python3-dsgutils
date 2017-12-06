@@ -1,8 +1,10 @@
+README.md
+setup.cfg
+setup.py
 dsgutils/__init__.py
 dsgutils.egg-info/PKG-INFO
 dsgutils.egg-info/SOURCES.txt
 dsgutils.egg-info/dependency_links.txt
-dsgutils.egg-info/not-zip-safe
 dsgutils.egg-info/requires.txt
 dsgutils.egg-info/top_level.txt
 dsgutils/pd/__init__.py

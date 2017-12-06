@@ -1,10 +1,12 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: dsgutils
 Version: 0.1.0
 Summary: Utility functions for common data science operations and visualizations
-Home-page: https://github.com/datascienceisrael/dsgutils
+Home-page: https://github.com/datascienceisrael/python3-dsgutils
 Author: Data Science Group
 Author-email: UNKNOWN
 License: MIT
+Download-URL: https://github.com/datascienceisrael/python3-dsgutils/archive/0.1.1.tar.gz
+Description-Content-Type: UNKNOWN
 Description: UNKNOWN
 Platform: UNKNOWN

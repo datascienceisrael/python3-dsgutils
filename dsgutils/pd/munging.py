@@ -6,9 +6,8 @@ def drop_by_cardinality(dataframe, values_to_drop=1, return_dropped=False):
     Drops columns by their cardinality.
     :param dataframe: DataFrame to drop columns from
     :type dataframe: pd.DataFrame
-    :param values_to_drop: Up to which cardinality to drop. ex.
-    If values_to_drop = 2, columns with cardinality of 1 and 2 will be dropped. (Default: 1)
-    :type values_to_drop: int
+    :param values_to_drop: Which cardinalities to drop
+    :type values_to_drop: Iterable
     :param return_dropped: Whether to return the names of the dropped values or not.
     If true a tuple returns with the second value being the list of dropped column names (Default: False)
     :type return_dropped: Boolean
