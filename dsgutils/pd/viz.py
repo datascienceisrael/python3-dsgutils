@@ -21,7 +21,8 @@ def display_corr_matrix(dataframe, on_columns, ax=None, cmap=None, **heatmap_kwa
 
     # Use default kwargs only if none were supplied
     default_kwargs = {
-        'vmax': 0.3,
+        'vmax': 1,
+        'vmin': -1,
         'center': 0,
         'square': True,
         'linewidths': .5,
