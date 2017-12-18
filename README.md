@@ -2,9 +2,10 @@
 
 This is the source code for the `dsgutils` python3 package
 
-See `
+See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/master/examples.ipynb) for usage examples.
 
 ----------
+# **Documentation**
 
 ## **Pandas**
 
