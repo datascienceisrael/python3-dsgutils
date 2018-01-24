@@ -1,6 +1,6 @@
 # **DSG Python3 Utilities**
 
-This is the source code for the `dsgutils` python3 package
+This is the source code for the python3 `dsgutils` package
 
 See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/master/examples.ipynb) for usage examples.
 
