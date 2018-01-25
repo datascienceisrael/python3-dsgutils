@@ -55,3 +55,37 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 		- heatmap_kwargs - can supply any of the heatmap kwargs for customization, refer to [seaborn heatmap docs](https://seaborn.pydata.org/generated/seaborn.heatmap.html#seaborn.heatmap) for available arguments 
 	- **Returns**
 	pyplot axis object
+	
+- `display_df_info` : Method for displaying and overview of the dataframe, including null and unique counts.
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe to show counts for
+		- df_name - str (Required)
+		Title of the dataframe
+		- max_rows - int (Optional)
+        Number of rows to display from the dataframe
+		- max_columns - int (Optional)
+        Number of columns to display from the dataframe
+	- **Returns**
+	None
+	
+- `display_stacked_bar` : Method for displaying a stacked bar plot given two categorical variables
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe to display stacked bar plot for
+		- groupby - str (Required)
+		Column name by which bars would be grouped
+		- on - str (Required)
+        Column name of the different bar blocks
+		- order - List of column names (Optional)
+        Order in which to draw the bars by
+        - unit - float (Optional)
+        Scale to which unit
+        - palette - matplotlib/seaborn color palette (Optional)
+        Color palette to use for drawing
+        - horizontal - boolean (Optional)
+        Horizontal or vertical barplot
+        - figsize - tuple (Optional)
+        Figure size
+	- **Returns**
+	pyplot axis object
