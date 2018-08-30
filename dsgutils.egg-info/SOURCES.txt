@@ -9,3 +9,4 @@ dsgutils.egg-info/requires.txt
 dsgutils.egg-info/top_level.txt
 dsgutils/pd/__init__.py
 dsgutils/pd/munging.py
+dsgutils/pd/viz.py

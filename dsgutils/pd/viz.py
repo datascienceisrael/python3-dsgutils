@@ -69,7 +69,7 @@ def display_df_info(df, df_name, max_rows=None, max_columns=None):
     display(display_df)
 
 
-def display_stacked_bar(df, groupby, on, order=None, unit=None, palette=None, horizontal=True, figsize=(11,11)):
+def display_stacked_cat_bar(df, groupby, on, order=None, unit=None, palette=None, horizontal=True, figsize=(11, 11)):
     """
     Displays a stacked bar plot given two categorical variables
     :param df: DataFrame to display data from
