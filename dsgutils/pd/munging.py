@@ -87,4 +87,17 @@ def camelcase2snake_case(dataframe):
     return dataframe.rename(columns={old_col: convert(old_col) for old_col in dataframe.columns})
 
 
+def pivot_by_2_categories(df, cat1, cat2):
+    """
+    Create pivot table of df by category 1 and category 2.
+    param: df: the dataframe
+    param: cat1: the first category
+    param: cat2: the second category
+    return: pivot table 
+    """
+    # Stacked dataframe of cat2 VS cat1
+    df_for_pivot = df[[cat1, cat2]].groupby([cat1, cat2]).size().reset_index(name='counts')
+    df_pivot = df_for_pivot.pivot(index=cat1, columns=cat2, values='counts')
+    return(df_pivot)
+
 

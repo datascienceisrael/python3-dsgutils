@@ -145,3 +145,543 @@ def display_stacked_cat_bar(df, groupby, on, order=None, unit=None, palette=None
         ax.set(ylabel='')
 
     return ax
+
+
+def value_count_plot(df, cat_features, save_plot = False, path_dir = None ):
+    
+    """
+    Plot value count of every categorical features having less than 30 different values. List all categorical features having more than 30. 
+    :param df: DataFrame to display data from
+    :param cat_features: List of categorical features
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot    
+   
+    """
+    cat_features = list(set(cat_features))    
+    if len(cat_features) != []:
+        less_than_30 = []
+        more_than_30 = []
+        for col in cat_features :
+            if df[col].nunique() < 30 :
+                less_than_30.append(col)
+            else :
+                more_than_30.append(col)
+        if less_than_30 != [] :
+            p_size = min(2, len(set(less_than_30)))
+            j = int(len(less_than_30) / 2) + 1
+            plt.figure(figsize=(4.5 ** p_size, 5.5 ** p_size))
+            plt.subplots_adjust()
+            for i, col in enumerate(less_than_30):
+                plt.subplot(j, p_size, i + 1)
+                df[col].value_counts().plot(kind='barh')
+                plt.title(str("Distribution of " + col), fontsize=10 * p_size)
+                plt.xticks(size=8 * p_size)
+                plt.yticks(size=8 * p_size)
+            plt.tight_layout()
+            plt.show(block=False)
+            if save_plot == True:
+                plt.savefig((str(path_dir) + "less_than_30_value_count_ordinal.png"))
+                plt.clf()
+        if more_than_30 != [] :
+            print(', '.join(more_than_30), 'have more than 30 different values')
+    else:
+        print("No categorial features to plot")
+        
+
+def value_count_top(df, cat_features, top = 10, save_plot = False, path_dir = None ):
+    """ 
+    Plot value count top values of a list of categorical features
+    :param df: DataFrame to display data from
+    :param cat_features: List of categorical features
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot   
+    """
+    cat_features = list(set(cat_features))
+    cols = cat_features
+    if len(cols) != 0:
+        p_size = min(2, len(set(cols)))
+        j = int(len(cols) /2)+1
+        plt.figure(figsize=(4.5**p_size, 4.5**p_size))
+        plt.subplots_adjust()
+        for i, col in enumerate(cols):
+            plt.subplot(j, p_size, i+1)
+            df[col].value_counts()[:top].plot(kind='barh')
+            plt.title(str("Distribution of TOP " +str(top) +" "+ col), fontsize=10*p_size)
+            plt.xticks(size=8*p_size)
+            plt.yticks(size=8*p_size)
+        plt.tight_layout()
+        plt.show(block=False)
+        if save_plot == True:
+            plt.savefig((str(path_dir) + "top_"+str(top)+"_value_count_ordinal.png"))
+            plt.clf()
+    else:
+        print("No categorial features to plot")
+
+        
+def value_count_bottom(df, cat_features, bottom = 10, save_plot = False, path_dir = None ):
+    """
+    Plot value count bottom values of a list of categorical features
+    :param df: DataFrame to display data from
+    :param cat_features: List of categorical features
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    cat_features = list(set(cat_features))
+    cols = cat_features
+    if len(cols) != 0:
+        p_size = min(2, len(cols))
+        j = int(len(cols) /2)+1
+        plt.figure(figsize=(4.5**p_size, 4.5**p_size))
+        for i, col in enumerate(set(cols)):
+            plt.subplot(j, p_size, i+1)
+            df[col].value_counts()[-bottom:].plot(kind='barh')
+            plt.title(str("Distribution of BOTTOM "+str(bottom)+ " " + col), fontsize=10*p_size)
+            plt.xticks(size=8*p_size)
+            plt.yticks(size=8*p_size)
+        plt.tight_layout()
+        plt.show(block=False)
+        if save_plot == True:
+            plt.savefig((plot_dir + "bottom_"+str(bottom)+"_value_count_ordinal.png"))
+            plt.clf()
+    else:
+        print("No categorial features to plot")
+        
+        
+def distrib_numerical(df, numerical_feat, percentiles = 0.05, kde = True, save_plot = False, path_dir = None): 
+    """
+    Plot distribution of numerical features with the gaussian kernel density if there are more than 10 different values
+    (previously: distrib_ordinal or distrib_continuous)
+    :param df: DataFrame to display data from
+    :param numerical_feat: List of Continuous features
+    :param percentiles: removes the bottom and top outliers 
+    :param kde: if True, plot a gaussian kernel density estimate for the distribution
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    numerical_feat = list(set(numerical_feat))
+    kde_orig = kde
+    if len(numerical_feat) != 0:
+        p_size = min(2, len(numerical_feat))
+        j = int(len(numerical_feat) / 2) + 1
+        plt.figure(figsize=(4.5 ** p_size, 4 ** p_size))
+        for i, col in enumerate(numerical_feat):
+            if percentiles != None:
+                good_data = df[df[col].quantile(percentiles) < df[col]] 
+                good_data = good_data[good_data[col] < good_data[col].quantile(1-percentiles)]
+            else :
+                good_data = df
+            plt.subplot(j, p_size, i + 1)
+            # Check the need for the kde only if it's True
+            if (kde_orig):
+                if (good_data[~good_data[col].isnull()][col].nunique() <= 10):
+                    kde = False
+                else:
+                    kde = True
+                    
+            sns.distplot(good_data[~good_data[col].isnull()][col], kde = kde)
+            plt.title(str("Distribution of " + col), fontsize=10*p_size)
+            plt.xticks(size=8*p_size)
+            plt.yticks(size=8*p_size)
+            plt.xlabel(col, size=20)
+        plt.tight_layout()
+        plt.show(block=False)
+        if save_plot == True:
+            plt.savefig((plot_dir + "Box_plot_continuous_feature.png"))
+            plt.clf()
+    else:
+        print("No Continuous feature to plot")
+        
+        
+def box_plot_continuous(df, cont_feat, percentiles = 0.05, save_plot = False, path_dir = None):   
+    """
+    Plot box_plot of continuous features
+    :param df: DataFrame to display data from
+    :param cont_feat: list of continuous features 
+    :param percentiles: removes the bottom and top outliers 
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    cont_feat = list(set(cont_feat))
+    if len(cont_feat) != 0:
+        p_size = min(2, len(cont_feat))
+        j = int(len(cont_feat) / 2) + 1
+        plt.figure(figsize=(4.5 ** p_size, 4.5 ** p_size))
+        for i, col in enumerate(cont_feat):
+            if percentiles != None:
+                good_data = df[df[col].quantile(percentiles) < df[col]] 
+                good_data = good_data[good_data[col] < good_data[col].quantile(1-percentiles)] 
+            else :
+                good_data = df
+                
+            plt.subplot(j, p_size, i + 1)
+            good_data[~good_data[col].isnull()][[col]].boxplot(fontsize=10*p_size)
+            plt.title(str("Box plot of " + col),fontsize=10*p_size)
+            plt.xticks(size=8*p_size)
+            plt.yticks(size=8*p_size)
+        plt.tight_layout()
+        plt.show(block=False)
+        if save_plot == True:
+            plt.savefig((plot_dir + "Box_plot_continuous_feature .png"))
+            plt.clf()
+    else:
+        print("No Continuous feature to plot")
+
+        
+def count_month_year (df, month_col, year_col, save_plot = False, path_dir = None):
+    """
+    Plot number of raws per month_col and year_col
+    :param df: DataFrame to display data from
+    :param month_col: month column 
+    :param year_col: year column
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    sns.set(style="white")
+    g = sns.catplot(x=month_col, hue=year_col, data=df, kind="count",
+                       palette="BuPu", height=6, aspect=1.5)
+    plt.show(block=False)
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_month_year.png"))
+        plt.clf()
+    sns.set(style="darkgrid") # return to darkgrid style
+    
+
+def count_plot_col_per_date(df, date_col, col, num_label = 15, save_plot = False, path_dir = None):
+    """
+    Count of number of row per date and another column
+    :param df: DataFrame to display data from
+    :param: date_col: date column we want to sort by 
+    :param: col: the column we want to plot
+    :param: num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    sns.set(font_scale=1)
+    pltdec = df.groupby([date_col, col]).size().unstack()
+    fig, axs = plt.subplots();
+    plot_ = pltdec.plot.bar(stacked=True, ax=axs , cmap=plt.get_cmap('tab20c'))
+    fig.set_size_inches(14, 6);
+    plt.suptitle(str('Number of samples per '+ date_col+ ' and '+ col), fontsize=25, fontweight='bold')
+    axs.set_ylabel('Number of samples', fontsize=15)
+    plt.xlabel('Date',fontsize=15)
+    for ind, label in enumerate(plot_.get_xticklabels()):
+        if ind % num_label == 0:  # every num_label label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_date_"+str(col)+".png"))
+        plt.clf()
+
+        
+def countplot_cat1(df, cat1, title_suffix = '', perc = False, num_label = 15, save_plot = False, path_dir = None):
+    """
+    Plot the number of rows per categories in column cat1
+    :param df: DataFrame to display data from
+    :param cat1: We will show the number of sample for each value in this columns
+    :param title_suffix: if we want to add a suffix to the title 
+    :param perc: if True, plot percentage of the data instead of the number of sample
+    :param num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+  
+    """
+    
+    # Count the number of records for each value in category #1
+    if perc == True : 
+        comp_count = df[cat1].value_counts()/len(df[cat1])
+        comp_count = comp_count.nlargest(len(comp_count))
+    else : 
+        comp_count = df[cat1].value_counts()
+        comp_count = comp_count.nlargest(len(comp_count))
+    sns.set(font_scale=1.2)
+    plt.figure(figsize=(12,5))
+    plot = sns.countplot(x=cat1, data=df)
+    plt.title('Count the number of different %s values %s' % (cat1, title_suffix));
+    plt.xticks(rotation=90)
+    for ind, label in enumerate(plot.get_xticklabels()):
+        if ind % num_label == 0:  # every num_label label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    plt.show()
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_of"+str(cat1)+".png"))
+        plt.clf()
+
+
+def density_plot_cat1(df, cat1, bins, kde = False, title_suffix = '', save_plot = False, path_dir = None ):
+    """
+    Density plot of column cat1 with bins 
+    :param df: DataFrame to display data from
+    :param cat1: We will show the number of sample for each value in this columns
+    :param bins: choose number of bins
+    :param kde: Whether to plot a gaussian kernel density estimate for the distribution
+    :param title_suffix: if we want to add a suffix to the title 
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot   
+    
+    """
+    # Count the number of records for each value in category #1
+    sns.set(font_scale=1.2)
+    plt.figure(figsize=(12,5))
+    plot = sns.distplot(df[~df[cat1].isnull()][cat1], kde=kde, bins=bins)
+    plt.title('Density of %s %s' % (cat1, title_suffix));
+    if (df[cat1].dtype == 'O'):
+        plt.xticks(rotation=90)
+    plt.show()
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_of"+str(cat1)+".png"))
+        plt.clf()
+        
+        
+def num_of_cat2_per_cat1(df, cat1, cat2, figsize=(12,5), normalize = False, num_label = 1, save_plot = False, path_dir = None ):
+    """
+    Number of different values of column cat2 for every category of column cat1
+    :param df: DataFrame to display data from
+    :param cat1: we group df by column cat1
+    :param cat2: We count the number of different values of column cat2 in every category of column cat1
+    :param figsize: we can change the size of the plot 
+    :param normalize: Normalize the counts if true 
+    :param num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot   
+    """
+    # Group by category #1 and counts the unique values of category #2 for each group
+    comp_count = df.groupby(cat1)[cat2].nunique().sort_values(ascending=False)
+    if (normalize == True):
+        comp_count = comp_count*100.0/(comp_count.sum())
+     # Bar plot
+    plt.figure(figsize=figsize)
+    
+    plot = sns.barplot(comp_count.index, comp_count.values, alpha=0.8)
+    if (normalize == True):
+        plt.ylabel(str('Number of ' + cat2 + ' [%]'), fontsize=12)
+        plt.title(str('Percentage of '+ cat2+ ' per '+ cat1))
+    else:
+        plt.ylabel(str('Number of ' + cat2), fontsize=12)
+        plt.title(str('Number of '+ cat2+ ' per '+ cat1))
+    plt.xlabel(cat1, fontsize=12)
+    plt.xticks(rotation=90)
+    for ind, label in enumerate(plot.get_xticklabels()):
+        if ind % num_label == 0:  # every 15th label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    plt.show()
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_of"+str(cat1)+"per _"+str(cat2)+".png"))
+        plt.clf()
+
+        
+def count_of_cat2_per_cat1(df, cat1, cat2, figsize=(10,5), xlim =None, ylim= None, num_label =1, save_plot = False, path_dir = None):
+    """
+    Count of the Number of different values of column cat2 for every category of column cat1 
+    :param df: DataFrame to display data from
+    :param cat1: we group df by column cat1
+    :param cat2: We show the number of sample for each value in column cat2
+    :param figsize: we can change the size of the plot 
+    :param xlim: If we want to set a limit on x on the plot
+    :param ylim: If we want to set a limit on x on the plot
+    :param num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot  
+
+    """
+    
+    # Count of Number of cat2 per cat1 :
+    store_count = df.groupby(cat1)[cat2, cat1].nunique()[cat2].value_counts()
+    store_count = store_count.nlargest(len(store_count))
+    plt.figure(figsize = figsize)
+    plot = sns.barplot(store_count.index, store_count.values, alpha=0.8)
+    plt.title(str('Count of Number of ' + cat2 + ' per ' +cat1))
+    plt.ylabel('Number of occurence', fontsize=12)
+    plt.xlabel(str('Number of ' + cat2), fontsize=12)
+    for ind, label in enumerate(plot.get_xticklabels()):
+        if ind % num_label == 0:  # every 15th label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    if ylim != None:
+        plot.axes.set_ylim(0, ylim)
+    if xlim !=None:
+        plot.axes.set_xlim(0, xlim)
+    plt.show()
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_of"+str(cat1)+"per _"+str(cat2)+".png"))
+        plt.clf()
+
+        
+def count_of_cat3_per_cat1cat2(df, cat1, cat2, cat3, num_label, save_plot = False, path_dir = None ):
+    """
+    Count of the Number of different values of column cat3 for every category of column cat1 and column cat2 
+    :param df: DataFrame to display data from
+    :param cat1: we group df by column cat1
+    :param cat2 : we group by column cat2
+    :param cat3: We show the number of sample for each value in column cat3
+    :param num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot  
+    """
+    
+    search_term_count = df.groupby([cat1, cat2])[cat1,cat2, cat3].nunique()[cat3].value_counts()
+    search_term_count = search_term_count.nlargest(len(search_term_count))
+    plt.figure(figsize=(10,5))
+    plot = sns.barplot(search_term_count.index, search_term_count.values, alpha=0.8)
+    plt.title(str('Count of Number of '+cat3+' per '+cat1+' and per '+ cat2))
+    plt.ylabel('Number of occurence', fontsize=12)
+    plt.xlabel(str('Number '+ cat3 + ' per '+ cat1+ ' and per ' + cat2), fontsize=12)
+    for ind, label in enumerate(plot.get_xticklabels()):
+        if ind % num_label == 0:  # every 15th label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    plt.show()
+    if save_plot == True:
+        plt.savefig((plot_dir + "count_of"+str(cat3)+"per _"+str(cat2)+ "and"+str(cat1)+".png"))
+        plt.clf()
+
+        
+def boxplot_2_features(df, x, y, ylim_i = 0, set_y_limit = False, order_boxplot = False, print_value = False, num_label = 1, save_plot = False, path_dir = None):
+    
+    """
+    Box plot of different categories of column x, for values of y (float)
+    :param df: DataFrame to display data from
+    :param x: we group df by column x
+    :param y : we scatter at the values of y for every category of x
+    :param ylim_i: the limite we want to set for y in the plot (if set_y_limit = True)
+    :param set_y_limit: True if we don't want to show all the values of y
+    :param order_boxplot: True if we want to order the plot by the value count of x
+    :param print_value: True if we want to print the value count of x
+    :param num_label: we show x labels only every num_label
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot
+    """
+    
+    value_counts_temp = df[x].value_counts()
+    sns.set(font_scale=2)
+    f, ax = plt.subplots(figsize=(18, 7));
+    if order_boxplot :
+        plot =sns.boxplot(x=x, y=y, data=df, order = value_counts_temp.index)
+    else:
+        plot =sns.boxplot(x=x, y=y, data=df) 
+    ax.set_title('Boxplot of {} group by {}'.format(y, x));
+    plt.xticks(rotation=90);
+    if set_y_limit:
+        ax.set_ylim(0, ylim_i);
+    for ind, label in enumerate(plot.get_xticklabels()):
+        if ind % num_label == 0:  # every 15th label is kept
+            label.set_visible(True)
+        else:
+            label.set_visible(False)
+    if print_value :
+        print(value_counts_temp)
+    if save_plot == True:
+        plt.savefig((plot_dir + "boxplot"+str(y)+"per _"+str(x)+".png"))
+        plt.clf()
+
+        
+def scatter_2_features(df, x, y, ylim_i = 0, set_y_limit = False, xlim_i = 0, set_x_limit = False, order_boxplot = False, print_value = False, num_label = 1):
+    
+    """
+    Scatter plot of different categories of column x, for values of y (float)
+    :param df: DataFrame to display data from
+    :param x: we group df by column x
+    :param y : we look at the values of y for every category of x
+    :param ylim_i: the limite we want to set for y in the plot (if set_y_limit = True)
+    :param set_y_limit: True if we don't want to show all the values of y
+    :param order_boxplot: True if we want to order the plot by the value count of x
+    :param print_value: True if we want to print the value count of x
+    :param num_label: we show x labels only every num_label
+    """
+        
+    value_counts_temp = df[x].value_counts()
+    f, ax = plt.subplots(figsize=(18, 7));
+    plot =plt.scatter(df[x], df[y])
+    plt.xticks(rotation=90);
+    ax.set_title('Scatter plot of {} group by {}'.format(y, x));
+    plt.xlabel(str(x))
+    plt.ylabel(str(y))
+    if set_y_limit:
+        ax.set_ylim(top = ylim_i);
+    if set_x_limit:
+        ax.set_xlim(right = xlim_i);
+    if print_value:
+        print(value_counts_temp)
+
+        
+def stackedBarPlot(df, cat1, cat2, bar_size=30, nan_colums_thresh=0, figsize=(20, 10), percentile=0.001, plot_flag = 1, normalize = False, sort_bars = False, return_pivot = False): 
+    """
+    Stacked Bar Plot Number of samples per cat1 and cat2
+    :param df: dataframe we want to see 
+    :param cat1: we group df by column cat1
+    :param cat2 : we group by column cat2
+    :param bar_size: size of the bars
+    :param nan_colums_thresh: Drops rows having more than nan_colums_thresh Nan values
+    :param figsize: size of the figure
+    :param percentile: if we want to hide what over the 100-percentile and under percentile of the data
+    :param plot_flag: if == 1, lot the graph 
+    :param normalize: if True, plot a Normalize by the sum of the row
+    :param sort_bars: sort the search term index in descending order
+    :param return_pivot: if True, return the pivot table
+
+    """
+    
+    df_for_pivot = df[[cat1, cat2]].groupby([cat1, cat2]).size().reset_index(name='counts')
+    df_pivot = df_for_pivot.pivot(index=cat1, columns=cat2, values='counts')
+    
+    if normalize == True:
+        df_pivot['sum_cols'] = df_pivot.sum(axis = 1)
+        # Normalize by the sum of the row
+        df_pivot_percent = df_pivot.div(df_pivot.sum_cols, axis=0)
+        # Drop the sum column
+        df_pivot_clean = df_pivot_percent.drop(columns=['sum_cols'])
+        not_nan_positions_ratio = 100
+    else:
+        # Drops rows having more than nan_colums_thresh Nan values
+        # In case of search_term VS search_position, drops rows with all NaN and only search_position = 11 is not NaN
+        df_pivot_clean = df_pivot.dropna(thresh=nan_colums_thresh)
+    
+        # sort the search term index in descending order
+        if sort_bars:
+            ordered_index = df_pivot_clean.sum(axis=1).sort_values(ascending=False).index
+            df_pivot_clean = df_pivot_clean.reindex(ordered_index)
+
+        # Calculate the ratio of the informative search terms size compared to the overall size of the different search terms
+        not_nan_positions_ratio = 100 * df_pivot_clean.shape[0] / (df_pivot.shape[0])
+   
+    
+    if plot_flag == 1:
+        # Choose only the top percentile data to avoid data resolution problems
+        # df_to_plot = df_pivot_clean[df_pivot_clean.sum(axis = 1) > df_pivot_clean.sum(axis = 1).quantile(percentile)]
+
+        # Choose only the top 30 bars to avoid data resolution problems
+        df_to_plot = df_pivot_clean.iloc[0:bar_size, ]
+
+        # Stacked bar plot
+        df_to_plot.plot.bar(stacked=True, figsize=figsize, cmap=plt.get_cmap('tab20c'))
+        if normalize == True:
+            plt.ylabel("Normalized distribution", fontsize=15)
+        else:
+            plt.suptitle(str('Number of samples per '+ cat1 + ' and '+ cat2), fontsize=20, fontweight='bold')
+            plt.ylabel('Number of samples', fontsize=15)
+                
+    if return_pivot == True :  
+        return (df_pivot_clean, not_nan_positions_ratio)
+    
+
+def plot_correlations_per_categories(df_plot, cat1, cat2, feature_x, target_y, title_suffix = ''):
+    """
+    Correlation plot of cat1 with target_y, grouped by cat2
+    :param df_plot: dataframe we want to see with the column Correlation of cat1 and cat2
+    :param cat1: we group df by column cat1
+    :param cat2 : we group by column cat2
+    :param feature_x : the feature x 
+    :param target_y : the target feature 
+    :param title_suffix : if we want to add a suffix to the title 
+    """    
+    # Plot the correlations
+    g = sns.catplot(x=cat1, y='Correlation', hue=cat2, data=df_plot, height = 5, aspect = 3, kind = 'strip')
+    plt.title('Correlations of %s per %s %s' % (feature_x, target_y, title_suffix))
+    plt.xticks(rotation=90);
+    plt.ylim(-1, 1);
