@@ -2,7 +2,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from IPython.display import display, HTML
+from IPython.display import display, HTML, Markdown
+from collections import defaultdict
+from itertools import combinations
+
+def printmd(string):
+    display(Markdown(string))
 
 def display_corr_matrix(dataframe, on_columns, ax=None, cmap=None, **heatmap_kwargs):
     """
@@ -610,7 +615,7 @@ def scatter_2_features(df, x, y, ylim_i = 0, set_y_limit = False, xlim_i = 0, se
         print(value_counts_temp)
 
         
-def stackedBarPlot(df, cat1, cat2, bar_size=30, nan_colums_thresh=0, figsize=(20, 10), percentile=0.001, plot_flag = 1, normalize = False, sort_bars = False, return_pivot = False): 
+def stacked_bar_plot(df, cat1, cat2, bar_size=30, nan_colums_thresh=0, figsize=(20, 10), percentile=0.001, plot_flag = 1, normalize = False, sort_bars = False, return_pivot = False): 
     """
     Stacked Bar Plot Number of samples per cat1 and cat2
     :param df: dataframe we want to see 
@@ -685,3 +690,177 @@ def plot_correlations_per_categories(df_plot, cat1, cat2, feature_x, target_y, t
     plt.title('Correlations of %s per %s %s' % (feature_x, target_y, title_suffix))
     plt.xticks(rotation=90);
     plt.ylim(-1, 1);
+
+    
+def na_count(df):
+    """
+    Tells the shape of the data, calculate the number of Na values per columns in percentages and in number, and classify them from largest to smallest.
+    :param df: dataframe we want to see 
+    """
+    print("Size of the current file is:", df.shape)
+    print("")
+    printmd("*__Percentage of Na per columns in the data:__*")
+    # Calculate the number of the NA values and its precentage
+    df_temp = df.isnull().sum().reset_index()
+    df_temp.columns = ['column_name', 'na_size']
+    df_temp['na_size_percentage'] = round(df_temp.na_size*100.0/df.shape[0], 2)
+    df_temp = df_temp.sort_values(by='na_size', ascending=False)
+    print(df_temp)
+#     print((round(df.isnull().sum()/df.shape[0]*100)))
+    print("")
+    
+    
+def get_percentage_missing(series):
+    """ 
+    Calculates percentage of NaN values in DataFrame
+    :param series: Pandas DataFrame object
+    :return: float
+    """
+    num = series.isnull().sum()
+    den = len(series)
+    return round(num/den*100, 2)
+    
+    
+def percentage_missing_plots(df, perc_missing = 0.1, save_plot = False, path_dir = None):
+    """ 
+    Plot percentage of NaN values in DataFrame, having more than perc_missing missing values
+    :param df: dataframe we want to see     
+    :param perc_missing: max percentage of missing value we don't want to show
+    :param save_plot: if True save plot to path_dir
+    :param path_dir: path directory where you want to save the plot  
+    
+    """
+    
+    # Missing value proportion in each column:
+    perc = {}
+    for col in df.columns:
+        perc_col = get_percentage_missing(df[col])
+        if perc_col > float(perc_missing*100):
+            perc[col] = perc_col
+            # perc = dict(sorted(perc.items(), key=lambda x: x[1]))
+    if perc != {}:
+        perc_df = pd.DataFrame(sorted(list(perc.items()), key=lambda x: x[1]))
+#         plt.figure(figsize=(10, 10));
+        ax = perc_df.plot(x=0, y=1, kind='barh', legend=False);
+        ax.yaxis.tick_left();
+        plt.title(str('Percentage of Missing value in the data \n (Having more than ' + str(
+            perc_missing * 100) + '% missing values)'), fontsize=15);
+        plt.xticks(size=15);
+        plt.yticks(size=15);
+        plt.ylabel('Features', fontsize=15);
+        plt.xlabel('Percentage', fontsize=15);
+        plt.show(block=False);
+        if save_plot == True:
+            plt.savefig(path_dir + "percentage_missing.png")
+            plt.clf()
+    else:
+        print("There are no missing value in the data set")
+        
+
+def data_categorical(df, cat_features = [], cont_features = []):
+    """
+    List all object type columns, print number of unique values for every categorical feature, print 5 unique samples if every Categorical feature
+    :param df: dataframe we want to see 
+    :param cat_features: Known list of categorical features (can be empty)
+    :param cont_features: Known list of continuous features (can be empty)
+    :return cat_features: the list of categorical features
+    """
+    subset_cat = []
+    subset_dict={}
+    # Add all the object type features to config.cat_features 
+    for col in df.columns:
+        if df[col].dtype == 'object' and col not in cont_features:
+            subset_cat.append(col)
+            if col not in cat_features :
+                cat_features.append(col)
+    if cat_features !=[]:
+        print('Categorical features : ', ' '.join(cat_features))
+        printmd('**Number of unique values for every feature:**')
+        print(pd.DataFrame(df[cat_features].nunique(), columns = ['Unique values']).sort_values(by = 'Unique values', ascending=False))
+        printmd("**5 uniques samples of every Categorical Features :**")
+        for col in cat_features :
+            subset_dict[col]= df[col].unique()[:5]
+        print(pd.DataFrame.from_dict(subset_dict, orient='index').transpose())
+    return (cat_features)
+        
+        
+def data_continuous(df, cat_features = [], cont_features = []) :
+    """
+    Return a list of int or float type columns, convert all columns of cont_features to numericPrint the description of all continuous features
+    :param df: dataframe we want to see 
+    :param cat_features: Known list of categorical features (can be empty)
+    :param cont_features: Known list of continuous features (can be empty)
+    :return cont_features: the list of categorical features
+    """
+    subset_cont =[]
+    for col in list(df.columns):
+        if df[col].dtype == 'int' or df[col].dtype == 'float64':
+            if col not in cont_features and col not in cat_features:
+                print(col, "was added to continuous features")
+                cont_features.append(col)
+                subset_cont.append(col)
+    for col in cont_features:
+        if col not in subset_cont:
+            subset_cont.append(col)
+    print('Continuous features : ', ' '.join(subset_cont))
+    printmd("**Description of continuous columns:**")
+    print(round(df[subset_cont].describe()))
+    return (cont_features)
+
+
+def data_all_types(df):
+    
+    """
+    Print the type of every columns in the data.   
+    :param df: dataframe we want to see 
+    """
+    
+    printmd ("**Type of every column in the data**")
+    print("")
+    print(df.dtypes)
+    
+    
+def zero_one_card(df):
+    """
+    Show 1 or 0 cardinality columns 
+    :param : df : The dataframe
+    """
+    unique_values = defaultdict()
+    for col in df.columns:
+        if df[col].nunique() < 2:
+            unique_values[col] = df[col].nunique()
+    if len(unique_values) > 0:
+        printmd(str("* Columns: *"+', '.join(list(unique_values.keys()))+"* have less than two different values"))
+        for col in unique_values.keys():
+            printmd(str('*   *' + col + "* has " + str(df[col].nunique()) + ' differents values :' + str(df[col].unique())))
+    else:
+        printmd("* No columns have less than 2 different values")
+        
+
+def same_num_of_unique_val(df):
+    """
+    Show columns having same number of unique value 
+    :param : df : The Dataframe
+    """
+    unique_values = dict()
+    for col in df.columns:
+        unique_values[col] = df[col].nunique()
+    similar_columns = [i for i in combinations(df.columns,2) if (unique_values[i[0]]==unique_values[i[1]] and i[0] != i[1])]
+    if similar_columns != []:
+        for (col1, col2) in similar_columns :
+            printmd(str("* *" + str(col1) +"* and *"+ str(col2)+ "* have same number of values "))
+    else :
+        printmd("* No columns have same number of unique values")
+        
+        
+def show_data(df):
+    """
+    Print the number of rows of the data loaded and shows the first five rows.
+    :param : df : The dataframe
+    
+    """
+    printmd(str("The Data contains **" + str(df.shape[0])+ '** rows.'))
+    printmd("*__Sample of the data :__*")
+    display(df.head(n=5))
+    print("")
+    print("")

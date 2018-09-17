@@ -50,6 +50,76 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns**
 	pivot table 
 	
+- `date_to_month_year` :Create year column and month column from a specific column of the dataframe. 
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- date_col - date64 (Required)
+		The date column
+	- **Returns**
+	pivot table 
+	
+- `delete_value_to_igonore` :  Remove values of certain columns in the dataframe.  
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- unused_columns - list (Required)
+		List of columns we want to delete
+	- **Returns** 
+	- dataframe - pd.DataFrame, the dataframe 
+	
+- `delete_column_to_ignore` : Remove col in unused_columns if they are still in the dataframe. 
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- col_values_to_ignore - list (Required)
+		dictionnary of columns with list values we want to ignore : {col1 : [value1, value2], col2 : [value3, value4]}
+	- **Returns** 
+	- dataframe - pd.DataFrame, the dataframe 
+	
+- `change_col_value_to_other` : Change column value of specific column to other value. Add it to change_col_value as a dictionnary
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- change_col_value - Dictionnary (Required)
+		Dictionnary of columns were we want to change some values : 
+        {col1 : {old_value1: new_value1, old_value2 : new_value2} , col2 : ...}
+	- **Returns** 
+	- dataframe - pd.DataFrame, the dataframe 
+    
+    - `change_col_to_date_format` : Change time_features to date format 
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- time_features - list (Required)
+		list of time_features
+	- **Returns** 
+	- dataframe - pd.DataFrame, the new dataframe 
+    
+     - `missing_val_imput` : Change missing value of specific column to specific value 
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- missing_value_imputation - dictionnary (Required)
+		dictionnary of columns with value to replace
+	- **Returns** 
+	- dataframe - pd.DataFrame, the new dataframe 
+    
+     - `delete_rows_missing_keys` : Delete rows with missing keys variables, and show them
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+		- keys_variables - list (Required)
+		List of keys variables in your dataset
+	- **Returns** 
+	- dataframe - pd.DataFrame, the new dataframe 
+    
+     - `delete_duplicate_rows` : Delete duplicate rows and show a sample of the duplicates.
+	- **Variables (in order)**:
+		- dataframe - pd.DataFrame (Required)
+		The dataframe 
+	- **Returns** 
+	- dataframe - pd.DataFrame, the new dataframe 
 
 ### Viz
 `from dsgutils.pd.viz import...`
@@ -343,7 +413,7 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns**
 	None
 	
-- `stackedBarPlot` :    Stacked Bar Plot Number of samples per cat1 and cat2
+- `stacked_bar_plot` :    Stacked Bar Plot Number of samples per cat1 and cat2
 	- **Variables (in order)**:
 		- dataframe - pd.DataFrame (Required)
 		The dataframe 
@@ -386,3 +456,79 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
         If we want to add a suffix to the title 
 	- **Returns**
 	None
+	
+- `percentage_missing_plots` : Plot percentage of NaN values in DataFrame, having more than perc_missing missing values
+	- **Variables (in order)**:
+		- df_plot - pd.DataFrame (Required)
+		The dataframe we want to see
+		- perc_missing - int (Optional)
+		max percentage of missing value we don't want to show
+		- save_plot - boolean (Optional)
+        True if you want to save plot
+		- path_dir - str  (Optional)
+        Path diretory if you want to save the plot
+	- **Returns**
+	None
+	
+- `data_categorical` : List all object type columns, print number of unique values for every categorical feature, print 5 unique samples if every Categorical feature
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+		- cat_features - list (Optional)
+		Known list of categorical features (can be empty)
+		- cont_features - list (Optional)
+        Known list of continuous features (can be empty)
+	- **Returns**
+	cat_features - list : list of categorical features
+	
+- `data_continuous` : Return a list of int or float type columns, convert all columns of cont_features to numericPrint the description of all continuous features
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+		- cat_features - list (Optional)
+		Known list of categorical features (can be empty)
+		- cont_features - list (Optional)
+        Known list of continuous features (can be empty)
+	- **Returns**
+	cont_features - list : list of continuous features    
+	
+- `data_all_types` : Print the type of every columns in the data.
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+	- **Returns**
+	None
+    
+- `zero_one_card` : Show 1 or 0 cardinality columns 
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+	- **Returns**
+	None
+    
+- `same_num_of_unique_val` : Show columns having same number of unique value 
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+	- **Returns**
+	None
+    
+- `show_data` : Print the number of rows of the data loaded and shows the first five rows. 
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+	- **Returns**
+	None    
+    
+### Feateng
+`from dsgutils.pd.feateng import...`
+
+- `alphanumeric_feature` : Convert text column to alpha numeric column, replacing non alpha numeric with a space. 
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		The dataframe we want to see 
+		- text_column - str (Required)
+		The column containing text
+	- **Returns**
+		- df_new - pd.DataFrame
+        The new Dataframe
