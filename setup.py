@@ -9,5 +9,5 @@ setup(name='dsgutils',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-          'pandas', 'numpy', 'matplotlib', 'seaborn', 'ipython'
+          'pandas', 'numpy', 'matplotlib', 'seaborn', 'ipython', 'nltk'
       ])
