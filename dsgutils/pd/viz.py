@@ -172,7 +172,7 @@ def value_count_plot(df, cat_features, save_plot = False, path_dir = None ):
             else :
                 more_than_30.append(col)
         if less_than_30 != [] :
-            for i, col in enumerate(less_than_30):
+            for i, col insorted(list(enumerate(less_than_30)), key=lambda x: x[1]):
                 fig, ax = plt.subplots()
                 fig.set_size_inches(4.5,  5.5)
                 fig.set_size_inches(4,  4)
@@ -199,7 +199,7 @@ def value_count_top(df, cat_features, top = 10, save_plot = False, path_dir = No
     cat_features = list(set(cat_features))
     cols = cat_features
     if len(cols) != 0:
-        for i, col in enumerate(cols):
+        for i, col in sorted(list(enumerate(cols)), key=lambda x: x[1]):
             fig, ax = plt.subplots()
             fig.set_size_inches(4.5,  5.5)
             fig.set_size_inches(4,  4)
@@ -224,7 +224,7 @@ def value_count_bottom(df, cat_features, bottom = 10, save_plot = False, path_di
     cat_features = list(set(cat_features))
     cols = cat_features
     if len(cols) != 0:
-        for i, col in enumerate(set(cols)):
+        for i, col in sorted(list(enumerate(cols)), key=lambda x: x[1]):
             fig, ax = plt.subplots()
             fig.set_size_inches(4.5,  5.5)
             fig.set_size_inches(4,  4)
