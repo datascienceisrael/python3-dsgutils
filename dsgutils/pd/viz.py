@@ -172,18 +172,13 @@ def value_count_plot(df, cat_features, save_plot = False, path_dir = None ):
             else :
                 more_than_30.append(col)
         if less_than_30 != [] :
-            p_size = min(2, len(set(less_than_30)))
-            j = int(len(less_than_30) / 2) + 1
-            plt.figure(figsize=(4.5 ** p_size, 5.5 ** p_size))
-            plt.subplots_adjust()
             for i, col in enumerate(less_than_30):
-                plt.subplot(j, p_size, i + 1)
-                df[col].value_counts().plot(kind='barh')
-                plt.title(str("Distribution of " + col), fontsize=10 * p_size)
-                plt.xticks(size=8 * p_size)
-                plt.yticks(size=8 * p_size)
-            plt.tight_layout()
-            plt.show(block=False)
+                fig, ax = plt.subplots()
+                fig.set_size_inches(4.5,  5.5)
+                fig.set_size_inches(4,  4)
+                ax = df[col].value_counts().plot(kind='barh')
+                ax.set_title(str("Distribution of " + col), fontsize=10)
+                plt.show(block=False)
             if save_plot == True:
                 plt.savefig((str(path_dir) + "less_than_30_value_count_ordinal.png"))
                 plt.clf()
@@ -191,7 +186,7 @@ def value_count_plot(df, cat_features, save_plot = False, path_dir = None ):
             print(', '.join(more_than_30), 'have more than 30 different values')
     else:
         print("No categorial features to plot")
-        
+
 
 def value_count_top(df, cat_features, top = 10, save_plot = False, path_dir = None ):
     """ 
@@ -204,18 +199,13 @@ def value_count_top(df, cat_features, top = 10, save_plot = False, path_dir = No
     cat_features = list(set(cat_features))
     cols = cat_features
     if len(cols) != 0:
-        p_size = min(2, len(set(cols)))
-        j = int(len(cols) /2)+1
-        plt.figure(figsize=(4.5**p_size, 4.5**p_size))
-        plt.subplots_adjust()
         for i, col in enumerate(cols):
-            plt.subplot(j, p_size, i+1)
-            df[col].value_counts()[:top].plot(kind='barh')
-            plt.title(str("Distribution of TOP " +str(top) +" "+ col), fontsize=10*p_size)
-            plt.xticks(size=8*p_size)
-            plt.yticks(size=8*p_size)
-        plt.tight_layout()
-        plt.show(block=False)
+            fig, ax = plt.subplots()
+            fig.set_size_inches(4.5,  5.5)
+            fig.set_size_inches(4,  4)
+            ax = df[col].value_counts()[:top].plot(kind='barh')
+            plt.title(str("Distribution of TOP " +str(top) +" "+ col), fontsize=10)
+            plt.show(block=False)
         if save_plot == True:
             plt.savefig((str(path_dir) + "top_"+str(top)+"_value_count_ordinal.png"))
             plt.clf()
@@ -234,17 +224,13 @@ def value_count_bottom(df, cat_features, bottom = 10, save_plot = False, path_di
     cat_features = list(set(cat_features))
     cols = cat_features
     if len(cols) != 0:
-        p_size = min(2, len(cols))
-        j = int(len(cols) /2)+1
-        plt.figure(figsize=(4.5**p_size, 4.5**p_size))
         for i, col in enumerate(set(cols)):
-            plt.subplot(j, p_size, i+1)
-            df[col].value_counts()[-bottom:].plot(kind='barh')
-            plt.title(str("Distribution of BOTTOM "+str(bottom)+ " " + col), fontsize=10*p_size)
-            plt.xticks(size=8*p_size)
-            plt.yticks(size=8*p_size)
-        plt.tight_layout()
-        plt.show(block=False)
+            fig, ax = plt.subplots()
+            fig.set_size_inches(4.5,  5.5)
+            fig.set_size_inches(4,  4)
+            ax = df[col].value_counts()[-bottom:].plot(kind='barh')
+            plt.title(str("Distribution of BOTTOM "+str(bottom)+ " " + col), fontsize=10)
+            plt.show(block=False)
         if save_plot == True:
             plt.savefig((plot_dir + "bottom_"+str(bottom)+"_value_count_ordinal.png"))
             plt.clf()
@@ -705,8 +691,8 @@ def na_count(df):
     df_temp.columns = ['column_name', 'na_size']
     df_temp['na_size_percentage'] = round(df_temp.na_size*100.0/df.shape[0], 2)
     df_temp = df_temp.sort_values(by='na_size', ascending=False)
-    print(df_temp)
-#     print((round(df.isnull().sum()/df.shape[0]*100)))
+    print(df_temp.loc[df_temp['na_size'] > 0])
+    #     print((round(df.isnull().sum()/df.shape[0]*100)))
     print("")
     
     
@@ -839,16 +825,23 @@ def zero_one_card(df):
 
 def same_num_of_unique_val(df):
     """
-    Show columns having same number of unique value 
+    Show columns having same values_counts, and print a dataframes of the value_counts of both columns and their respectives values.
     :param : df : The Dataframe
     """
-    unique_values = dict()
+    value_count =dict()
     for col in df.columns:
-        unique_values[col] = df[col].nunique()
-    similar_columns = [i for i in combinations(df.columns,2) if (unique_values[i[0]]==unique_values[i[1]] and i[0] != i[1])]
+        value_count[col] = list(df[col].value_counts())
+    similar_columns = [i for i in combinations(df.columns,2) if (value_count[i[0]]==value_count[i[1]] and i[0] != i[1])]
     if similar_columns != []:
         for (col1, col2) in similar_columns :
             printmd(str("* *" + str(col1) +"* and *"+ str(col2)+ "* have same number of values "))
+            a = pd.DataFrame(df[col1].value_counts()).reset_index()
+            a.columns = [str('values_'+col1), 'count']
+            b = pd.DataFrame(df[col2].value_counts()).reset_index()
+            b.columns = [str('values_'+col2), 'count']
+            to_display = a.merge(b, on = 'count')
+            display(to_display[['count', str('values_'+col1), str('values_'+col2)]])
+
     else :
         printmd("* No columns have same number of unique values")
         
