@@ -24,6 +24,70 @@ def alphanumeric_feature(df, text_column):
     return(df_new)
 
 
+def one_hot_encode(df, feature_name, prefix="CAT_", is_list=False, delim=",", cat_amount=0):
+    """
+    Gets a DataFrame and a categorical column, and replace the
+    column with one hot encoded vectors. If the values in the
+    column are a list of categories, then the values are split
+    according to the given delimiter. The user has an option of
+    selecting cat_amount most frequent categories to take into
+    consideration (limiting the amount of categories / vectors)
+    :param df: DataFrame to create one hot encoded vectors for
+    :param feature_name: Categorical feature to turn to one hot vectors
+    :param prefix: Prefix to attach to the one-hot vector names
+    :param is_list: Flag to indicate whether the values in
+                    feature_name are a list of categories
+    :param delim: If the values are a list, the delimiter to split the categories
+    :param cat_amount: Number of most frequent categories to turn to one-hot vectors
+                        Default is o, meaning one-hot encode all categories
+    :return: None
+    """
+
+    if not isinstance(df, pd.core.frame.DataFrame):
+        raise ValueError('df must be a pandas DataFrame')
+
+    if not feature_name:
+        raise ValueError('feature_name parameter must be provided')
+
+    elif not feature_name in df.keys():
+        raise ValueError(feature_name + ' column does not exist in the given DataFrame')
+
+    if is_list:
+        # Split the categories by delimiter
+        df[feature_name] = [x.split(delim) if str(x) != 'nan' else "" for x in df[feature_name]]
+
+        if cat_amount > 0:
+            # Limit number of vectors created
+            one_hot_vals = set(pd.Series([item for sublist in df[feature_name] for item in sublist]) \
+                               .value_counts()[:cat_amount].index.values)
+
+        else:
+            # Choose all categories
+            one_hot_vals = set([item for sublist in df[feature_name] for item in sublist])
+
+        # Create one-hot vectors
+        for col in one_hot_vals:
+            df[prefix + feature_name + "_" + str(col)] = [int(col in x) for x in df[feature_name]]
+
+        del df[feature_name]
+
+        return
+
+    if cat_amount > 0:
+        # Limit number of vectors created
+        one_hot_vals = set(df[feature_name].value_counts()[:cat_amount].index.values)
+
+    else:
+        # Choose all categories
+        one_hot_vals = set(df[feature_name])
+
+    # Create one-hot vectors
+    for col in one_hot_vals:
+        df[prefix + feature_name + "_" + str(col)] = [1 if x == col else 0 for x in df[feature_name]]
+
+    del df[feature_name]
+    return
+
 # def create_top_gram(df, sentence_column, gram_range=(1, 2, 3, 4, 5)):
 #     """
     
