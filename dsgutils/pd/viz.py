@@ -53,6 +53,86 @@ def display_corr_matrix(dataframe, on_columns, ax=None, cmap=None, **heatmap_kwa
     return ax
 
 
+def display_n_most_correlated(df, n=5, to_color=True):
+    """
+    Takes a DataFrame and returns a DataFrame of correlations -
+    Each column is paired with the n columns most correlated to it
+
+    :param df: DataFrame to display data from
+    :param n: number of top values to present
+    :param to_color: flag - do the user want to color
+                     the correlaton values red and green
+    :return: styled correlation dataframe, presenting the top
+            n most correlated columns and values per column
+    """
+
+    def mask_variable_largest_per_row(df, n_max):
+        """
+        Create a mask, where only the largest n_max values are kept in the dataframe
+        :param df: DataFrame to display data from
+        :param n_max: number of top values to keep per row
+        :return: css property for styling
+        """
+        a = df.values
+        m, n = a.shape
+
+        nan_row_count = np.isnan(a).sum(1)
+        n_reset = n - n_max - nan_row_count
+        n_reset.clip(min=0, max=n - 1, out=n_reset)
+
+        sidx = a.argsort(1)
+        mask = n_reset[:, None] > np.arange(n)
+
+        c = sidx[mask]
+        r = np.repeat(np.arange(m), n_reset)
+        a[r, c] = np.nan
+        return df
+
+    def color_negative_red_positive_green(val):
+        """
+        Takes a scalar and returns a string with
+        the css property `'color: red'` for negative
+        strings, `'color: green'` for positive strings and
+        black otherwise.
+        :param val: numeric value
+        :return: css property for styling
+        """
+        if val < 0:
+            color = 'red'
+        elif val > 0:
+            color = 'green'
+        else:
+            color = 'black'
+
+        return 'color: %s' % color
+
+    if not isinstance(df, pd.core.frame.DataFrame):
+        raise ValueError('df must be a pandas DataFrame')
+
+    # Set the maximal number of columns to consider
+    n = min(n, len(df._get_numeric_data().columns))
+
+    # Compute the correlation matrix
+    corrs = df[list(set(df._get_numeric_data().columns))].corr()
+    corrs[corrs == 1] = np.nan
+
+    # Manipulate the correlation matrix to get the top n values
+    corrs_sorted_inner = mask_variable_largest_per_row(corrs, n).stack() \
+        .groupby(level=[0]).apply(lambda x: x.groupby(level=[1]).sum().sort_values(ascending=False))
+
+    corrs_outer_sorted = corrs_sorted_inner.groupby(level=[0]).sum().sort_values(ascending=False)
+
+    corrs_sorted_total = pd.DataFrame(corrs_sorted_inner.reindex(index=corrs_outer_sorted.index, level=0), \
+                                      columns=['Correlation Value'])
+
+    corrs_sorted_total.index.name = ['Column', 'Top Correlated Columns']
+
+    # Color values
+    if to_color:
+        corrs_sorted_total = corrs_sorted_total.style.applymap(color_negative_red_positive_green)
+
+    return corrs_sorted_total
+
 def display_df_info(df, df_name, max_rows=None, max_columns=None):
     """
     Display data and stats (null counts, unique counts and data types)
@@ -172,7 +252,7 @@ def value_count_plot(df, cat_features, save_plot = False, path_dir = None ):
             else :
                 more_than_30.append(col)
         if less_than_30 != [] :
-            for i, col insorted(list(enumerate(less_than_30)), key=lambda x: x[1]):
+            for i, col in sorted(list(enumerate(less_than_30)), key=lambda x: x[1]):
                 fig, ax = plt.subplots()
                 fig.set_size_inches(4.5,  5.5)
                 fig.set_size_inches(4,  4)
@@ -857,3 +937,53 @@ def show_data(df):
     display(df.head(n=5))
     print("")
     print("")
+
+
+def display_group_density_plot(df, groupby, on, palette, figsize):
+    """
+    Displays a density plot by group, given a continuous variable, and a group to split the data by
+    :param df: DataFrame to display data from
+    :param groupby: Column name by which plots would be grouped (Categorical, maximum 10 categories)
+    :param on: Column name of the different density plots
+    :param palette: Color palette to use for drawing
+    :param figsize: Figure size
+    :return: matplotlib.axes._subplots.AxesSubplot object
+    """
+
+    if not isinstance(df, pd.core.frame.DataFrame):
+        raise ValueError('df must be a pandas DataFrame')
+
+    if not groupby:
+        raise ValueError('groupby parameter must be provided')
+
+    elif not groupby in df.keys():
+        raise ValueError(groupby + ' column does not exist in the given DataFrame')
+
+    if not on:
+        raise ValueError('on parameter must be provided')
+
+    elif not on in df.keys():
+        raise ValueError(on + ' column does not exist in the given DataFrame')
+
+    if len(set(df[groupby])) > 10:
+        groups = df[groupby].value_counts().index[:10]
+
+    else:
+        groups = set(df[groupby])
+
+    # Get relevant palette
+    if palette:
+        palette = palette[:len(groups)]
+    else:
+        palette = sns.color_palette()[:len(groups)]
+
+    # Plot
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111)
+    ax.legend(bbox_to_anchor=(1.04, 1), loc='upper left')
+
+    for value, color in zip(groups, palette):
+        sns.kdeplot(df.loc[df[groupby] == value][on], shade=True, color=color, label=value)
+
+    ax.set_title(str("Distribution of " + on + " per " + groupby + " group"), fontsize=10)
+    return ax
