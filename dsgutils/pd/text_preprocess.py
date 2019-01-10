@@ -16,7 +16,7 @@ def clean_punctuation(s, punc_to_keep=[]):
         raise ValueError('The value passed is not a string')
 
     PUNCT = re.compile('[%s]' % re.escape("".join(set(string.punctuation) - set(punc_to_keep))))
-    return re.sub('\s+', ' ', PUNCT.sub(' ', s)).strip()
+    return re.sub('\s+', ' ', PUNCT.sub('', s)).strip()
 
 def remove_non_ascii(word):
     """
