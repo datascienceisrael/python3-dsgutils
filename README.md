@@ -87,7 +87,7 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns** 
 	- dataframe - pd.DataFrame, the dataframe 
     
-    - `change_col_to_date_format` : Change time_features to date format 
+- `change_col_to_date_format` : Change time_features to date format 
 	- **Variables (in order)**:
 		- dataframe - pd.DataFrame (Required)
 		The dataframe 
@@ -95,8 +95,7 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 		list of time_features
 	- **Returns** 
 	- dataframe - pd.DataFrame, the new dataframe 
-    
-     - `missing_val_imput` : Change missing value of specific column to specific value 
+- `missing_val_imput` : Change missing value of specific column to specific value 
 	- **Variables (in order)**:
 		- dataframe - pd.DataFrame (Required)
 		The dataframe 
@@ -105,7 +104,7 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns** 
 	- dataframe - pd.DataFrame, the new dataframe 
     
-     - `delete_rows_missing_keys` : Delete rows with missing keys variables, and show them
+- `delete_rows_missing_keys` : Delete rows with missing keys variables, and show them
 	- **Variables (in order)**:
 		- dataframe - pd.DataFrame (Required)
 		The dataframe 
@@ -114,7 +113,7 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns** 
 	- dataframe - pd.DataFrame, the new dataframe 
     
-     - `delete_duplicate_rows` : Delete duplicate rows and show a sample of the duplicates.
+- `delete_duplicate_rows` : Delete duplicate rows and show a sample of the duplicates.
 	- **Variables (in order)**:
 		- dataframe - pd.DataFrame (Required)
 		The dataframe 
@@ -532,3 +531,83 @@ See [`examples`](https://github.com/datascienceisrael/python3-dsgutils/blob/mast
 	- **Returns**
 		- df_new - pd.DataFrame
         The new Dataframe
+
+- `one_hot_encode` : Gets a DataFrame and a categorical column, and replace the
+    column with one hot encoded vectors. If the values in the
+    column are a list of categories, then the values are split
+    according to the given delimiter. The user has an option of
+    selecting cat_amount most frequent categories to take into
+    consideration (limiting the amount of categories / vectors) 
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		to create one hot encoded vectors for 
+		- feature_name - str (Required)
+		Categorical feature to turn to one hot vectors
+		- prefix - Prefix to attach to the one-hot vector names
+		- is_list - Flag to indicate whether the values in feature_name are a list of categories
+		- delim - If the values are a list, the delimiter to split the categories
+		- cat_amount - Number of most frequent categories to turn to one-hot vectors                        Default is 0, meaning one-hot encode all categories
+	- **Returns** None
+
+
+- `get_time_features` : Add the following features to the dataframe, derived from the timestamp: year, month, day, hour, minute, second, weekday name and day of the year.
+	- **Variables (in order)**:
+		- df - pd.DataFrame (Required)
+		 dataframe to add time features to 
+		- datetime_col - str (Required)
+		column name of the timestamp (can be a string column or of the type datetime)
+		- datetime_format - date format
+		- prefix - prefix for new column names
+	- **Returns** None
+
+### Text_Preprocess
+
+- `clean_punctuation` : Strip string of punctuation. 
+	- **Variables (in order)**:
+		- s - a string to strip of punctuation (Required)
+		- punc_to_keep - a set with all the punctuation marks to keep as a string, with no spaces e.g. {$#}
+	- **Returns**
+		- a string stripped of punctuation
+
+
+- `remove_non_ascii` :Remove non-ASCII characters from list of tokenized words. 
+	- **Variables (in order)**:
+		- word - a word to clean, string (Required)
+	- **Returns**
+		- the original word with only ascii characters
+
+- `unite_standalone_uppercase` : Unite single capital letters on a row, to one word. e.g.: U S A -> USA. 
+	- **Variables (in order)**:
+		- str_to_fix - word to examine and fix, string (Required)
+	- **Returns**
+		- new string with united single capital letters
+
+- `camel_case_split` : Seperate camel case words to two single words. 
+	- **Variables (in order)**:
+		- str_to_split - a word to seperate, string (Required)
+	- **Returns**
+		- new string with split camel case words
+
+- `lemmatize_word` : Lemmatize word according to the given POS tag. 
+	- **Variables (in order)**:
+		- word - a word to lemmatize, string (Required)
+		- pos - part of speech tag: 's' / 'a' / 'r' / 'v' / 'n' / 'adverb', string (Required)
+	- **Returns**
+		- the lemmatized word
+
+- `normalize_word` : Transform the given word from/to POS tags. 
+	- **Variables (in order)**:
+		- word - word to normalize, string (Required)
+		- from_pos - Part of speach the word is in, string (Required)
+		- to_pos - part of speech to convert to, string (Required) 
+	- **Returns**
+		- normalized word
+
+### General 
+
+- `cosine_list_similarity` : Get cosine similarity between two lists. 
+	- **Variables (in order)**:
+		- list_a - first list to compare (Required)
+		- list_b - second list to compare (Required)
+	- **Returns**
+		- cosine similarity between the lists [0, 1]
