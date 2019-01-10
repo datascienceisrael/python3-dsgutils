@@ -3,6 +3,7 @@ import pandas as pd
 import re
 from collections import defaultdict
 from collections import Counter
+from datetime import datetime
 import nltk
 
 
@@ -39,7 +40,7 @@ def one_hot_encode(df, feature_name, prefix="CAT_", is_list=False, delim=",", ca
                     feature_name are a list of categories
     :param delim: If the values are a list, the delimiter to split the categories
     :param cat_amount: Number of most frequent categories to turn to one-hot vectors
-                        Default is o, meaning one-hot encode all categories
+                        Default is 0, meaning one-hot encode all categories
     :return: None
     """
 
@@ -87,6 +88,43 @@ def one_hot_encode(df, feature_name, prefix="CAT_", is_list=False, delim=",", ca
 
     del df[feature_name]
     return
+
+def get_time_features(df, datetime_col, datetime_format, prefix=""):
+    '''
+    Add the following features to the dataframe, derived from the timestamp: year, month, day, hour, minute, second,
+    weekday name and day of the year
+     :param df: dataframe to add time features to
+     :param datetime_col: column name of the timestamp (can be a string column or of the type datetime)
+     :param datetime_format: date format
+     :param prefix: prefix for new column names
+     :return: None
+    '''
+    if not isinstance(df, pd.core.frame.DataFrame):
+        raise ValueError('df must be a pandas DataFrame')
+
+    if not datetime_col:
+        raise ValueError('datetime_col parameter must be provided')
+
+    elif not datetime_col in df.keys():
+        raise ValueError(datetime_col + ' column does not exist in the given DataFrame')
+
+    if type(df[datetime_col][0]) not in [str, datetime]:
+        raise ValueError('The given column must be of type str, or datetime')
+
+
+    if type(df[datetime_col][0]) == str:
+        df[datetime_col] = df[datetime_col].apply(lambda x: \
+                                                      datetime.strptime(x, datetime_format))
+
+    df[prefix + 'year'] = pd.to_datetime(df[datetime_col]).dt.year
+    df[prefix + 'month'] = pd.to_datetime(df[datetime_col]).dt.month
+    df[prefix + 'day'] = pd.to_datetime(df[datetime_col]).dt.day
+    df[prefix + 'hour'] = pd.to_datetime(df[datetime_col]).dt.hour
+    df[prefix + 'minute'] = pd.to_datetime(df[datetime_col]).dt.minute
+    df[prefix + 'second'] = pd.to_datetime(df[datetime_col]).dt.second
+    df[prefix + 'day_of_the_week'] = pd.to_datetime(df[datetime_col]).dt.weekday_name
+    df[prefix + 'day_of_the_year'] = pd.to_datetime(df[datetime_col]).dt.dayofyear
+
 
 # def create_top_gram(df, sentence_column, gram_range=(1, 2, 3, 4, 5)):
 #     """
